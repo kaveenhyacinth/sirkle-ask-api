@@ -1,9 +1,10 @@
 import { HydratedDocument } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { PollOptionDto } from '../dto/poll.dto';
 
 export type PollDocument = HydratedDocument<Poll>;
 
-@Schema()
+@Schema({ timestamps: true })
 export class Poll {
   @Prop()
   question: string;
@@ -11,14 +12,17 @@ export class Poll {
   @Prop()
   description?: string;
 
-  @Prop()
-  options: any[];
+  @Prop([{ _id: Number, value: String }])
+  options: PollOptionDto[];
 
   @Prop()
-  createdBy: string;
+  createdBy?: string;
 
   @Prop()
-  createAt: Date;
+  createdAt?: Date;
+
+  @Prop()
+  updatedAt?: Date;
 }
 
 export const PollSchema = SchemaFactory.createForClass(Poll);
