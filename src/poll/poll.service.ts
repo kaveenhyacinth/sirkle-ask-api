@@ -1,23 +1,23 @@
 import { Injectable } from '@nestjs/common';
-
-import * as fs from 'fs';
-import * as path from 'path';
+import { Model } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
+import { PollDocument } from './schema/poll.schema';
+import { CreatePollDto } from './dto/create-poll.dto';
 
 @Injectable()
 export class PollService {
-  getData() {
-    const filePath = path.join(__dirname, '../../mocks/sirkl-ask.json');
-    const jsonData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-    return jsonData;
+  constructor(@InjectModel('Poll') private pollModel: Model<PollDocument>) {}
+
+  async create(createPollDto: CreatePollDto): Promise<any> {
+    const createdPoll = new this.pollModel(createPollDto);
+    return createdPoll.save();
   }
 
-  getPolls() {
-    const data = this.getData();
-    return Object.values(data.polls);
+  async findAll() {
+    return await this.pollModel.find().exec();
   }
 
-  getPollById(id: string) {
-    const data = this.getData();
-    return data.polls[id];
+  async findOneById(id: string) {
+    return await this.pollModel.findOne({ _id: id }).exec();
   }
 }

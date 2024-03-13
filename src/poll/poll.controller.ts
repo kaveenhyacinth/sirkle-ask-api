@@ -1,17 +1,23 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { PollService } from './poll.service';
+import { CreatePollDto } from './dto/create-poll.dto';
 
 @Controller('polls')
 export class PollController {
   constructor(private pollService: PollService) {}
 
+  @Post()
+  async create(@Body() createPollDto: CreatePollDto) {
+    return await this.pollService.create(createPollDto);
+  }
+
   @Get()
-  getPolls() {
-    return this.pollService.getPolls();
+  async findAll() {
+    return await this.pollService.findAll();
   }
 
   @Get(':id')
-  getPollById(@Param('id') id: string) {
-    return this.pollService.getPollById(id);
+  findOneById(@Param('id') id: string) {
+    return this.pollService.findOneById(id);
   }
 }
