@@ -1,10 +1,19 @@
-import { Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { UserService } from '../user/user.service';
 import { LoginDto, RegisterDto } from './dto/auth.dto';
 import { JwtService } from '@nestjs/jwt';
 import { UserDocument } from '../user/schema/user.schema';
-import { EXCEPTIONS } from '../utils/constants';
+import {
+  INVALID_CREDENTIALS,
+  USER_ALREADY_EXISTS,
+  USER_NOT_FOUND,
+} from '../utils/constants';
 
 @Injectable()
 export class AuthService {
@@ -39,7 +48,7 @@ export class AuthService {
     const { password, ...rest } = registerDto;
 
     const existingUser = await this.userService.findByEmail(rest.email);
-    if (existingUser) return EXCEPTIONS.USER_ALREADY_EXISTS;
+    if (existingUser) throw new BadRequestException(USER_ALREADY_EXISTS);
 
     const passwordHash = await this.hashPassword(password);
 
@@ -52,13 +61,13 @@ export class AuthService {
 
   async login(loginDto: LoginDto) {
     const user = await this.userService.findByEmail(loginDto.email);
-    if (!user) return EXCEPTIONS.USER_NOT_FOUND;
+    if (!user) throw new BadRequestException(USER_NOT_FOUND);
 
     const isPasswordValid = await this.verifyPassword(
       loginDto.password,
       user.passwordHash,
     );
-    if (!isPasswordValid) return EXCEPTIONS.INVALID_CREDENTIALS;
+    if (!isPasswordValid) throw new UnauthorizedException(INVALID_CREDENTIALS);
 
     return {
       token: await this.generateToken(user),

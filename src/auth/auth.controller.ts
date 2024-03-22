@@ -2,7 +2,6 @@ import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Public } from '../decorators/public.decorator';
 import { LoginDto, RegisterDto } from './dto/auth.dto';
-import { exceptionHandler } from '../utils/exceptionHandler';
 
 @Controller('auth')
 export class AuthController {
@@ -12,13 +11,21 @@ export class AuthController {
   @Post('register')
   @HttpCode(HttpStatus.OK)
   async register(@Body() registerDto: RegisterDto) {
-    return exceptionHandler(await this.authService.register(registerDto));
+    try {
+      return await this.authService.register(registerDto);
+    } catch (error) {
+      throw error;
+    }
   }
 
   @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(@Body() loginDto: LoginDto) {
-    return exceptionHandler(await this.authService.login(loginDto));
+    try {
+      return await this.authService.login(loginDto);
+    } catch (error) {
+      throw error;
+    }
   }
 }
